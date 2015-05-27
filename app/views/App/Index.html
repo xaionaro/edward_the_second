@@ -1,7 +1,7 @@
 {{set . "title" "Home"}}
 {{template "header.html" .}}
 
-<header class="hero-unit" style="background-color:#A9F16C">
+<!--header class="hero-unit" style="background-color:#A9F16C">
   <div class="container">
     <div class="row">
       <div class="hero-text">
@@ -10,14 +10,150 @@
       </div>
     </div>
   </div>
-</header>
+</header-->
+
+Hello, I'm Edward II.
+
+<div id='debug'></div>
+
+<script type="text/javascript">
+	var key_down  = 0;
+	var key_up    = 0;
+	var key_right = 0;
+	var key_left  = 0;
+
+	function sendstate() {
+/*
+		forward_velocity = (key_up    - key_down) * 255;
+		rotate_velocity  = (key_right - key_left) * 255;
+		left = forward_velocity + (rotate_velocity)/(abs(forward_velocity)+1);
+
+		if (abs(left) > 255)
+			left  = 255 * (left/abs(left));
+		if (abs(right) > 255)
+			right = 255 * (left/abs(right));
+*/
+		forward_velocity = key_up    - key_down;
+		rotate_velocity  = key_right - key_left;
+		switch (forward_velocity) {
+			case 1:
+				switch (rotate_velocity) {
+					case 1:
+						state = 0;
+						break;
+					case 0:
+						state = 1;
+						break;
+					case -1:
+						state = 0;
+						break;
+				}
+				break;
+			case 0:
+				switch (rotate_velocity) {
+					case 1:
+						state = 3;
+						break;
+					case 0:
+						state = 5;
+						break;
+					case -1:
+						state = 2;
+						break;
+				}
+				break;
+			case -1:
+				switch (rotate_velocity) {
+					case 1:
+						state = 0;
+						break;
+					case 0:
+						state = 4;
+						break;
+					case -1:
+						state = 0;
+						break;
+				}
+				break;
+		}
+		$('#debug').html("State: "+state+": "+key_up+" "+key_down+" "+key_left+" "+key_right);
+		socket.send(state);
+	}
+
+	$('html').keydown(function(ev) {
+		switch (ev.which) {
+			case 37:
+				key_left  = 1;
+				break;
+			case 38:
+				key_up    = 1;
+				break;
+			case 39:
+				key_right = 1;
+				break;
+			case 40:
+				key_down  = 1;
+				break;
+			default:
+				return;
+		}
+		sendstate();
+	});
+	$('html').keyup(function(ev) {
+		switch (ev.which) {
+			case 37:
+				key_left  = 0;
+				break;
+			case 38:
+				key_up    = 0;
+				break;
+			case 39:
+				key_right = 0;
+				break;
+			case 40:
+				key_down  = 0;
+				break;
+			default:
+				return;
+		}
+		sendstate();
+	});
+
+	// Create a socket
+	var socket = new WebSocket('ws://'+window.location.host+'/websocket')
+
+	// Display a message
+	var display = function(event) {
+		alert(event);
+	}
+
+	// Message received on the socket
+	socket.onmessage = function(event) {
+		display(JSON.parse(event.data))
+	}
+/*
+	$('#send').click(function(e) {
+		var message = $('#message').val()
+		$('#message').val('')
+		socket.send(message)
+	});
+
+	$('#message').keypress(function(e) {
+		if(e.charCode == 13 || e.keyCode == 13) {
+			$('#send').click()
+			e.preventDefault()
+		}
+	})
+*/
+</script>
+
 
 <div class="container">
-  <div class="row">
-    <div class="span6">
-      {{template "flash.html" .}}
-    </div>
-  </div>
+	<div class="row">
+		<div class="span6">
+			{{template "flash.html" .}}
+		</div>
+	</div>
 </div>
 
 {{template "footer.html" .}}
